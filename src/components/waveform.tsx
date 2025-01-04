@@ -2,7 +2,25 @@
 
 import React, { useEffect, useRef } from "react";
 
-const SmoothWaveform: React.FC = () => {
+interface WaveformProps {
+	width?: number | string; // Allows setting custom width (default 100%)
+	height?: number | string; // Allows setting custom height (default 100%)
+	colors?: string[]; // Allows customizing colors (default gradient)
+	amplitude?: number; // Controls wave height
+	frequency?: number; // Controls wave frequency
+	layers?: number; // Controls number of wave layers
+	speed?: number; // Controls animation speed
+}
+
+const Waveform: React.FC<WaveformProps> = ({
+	width = "100%",
+	height = "100%",
+	colors = ["#34d399", "#fde047", "#f43f5e"], // Default colors
+	amplitude = 100,
+	frequency = 0.02,
+	layers = 1,
+	speed = 0.02,
+}) => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
 	useEffect(() => {
@@ -12,55 +30,38 @@ const SmoothWaveform: React.FC = () => {
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
-		// Resize the canvas
 		const resizeCanvas = () => {
-			canvas.width = window.innerWidth;
-			canvas.height = window.innerHeight;
+			canvas.width = canvas.offsetWidth;
+			canvas.height = canvas.offsetHeight;
 		};
+
 		resizeCanvas();
 		window.addEventListener("resize", resizeCanvas);
 
-		// Wave parameters
-		const numPoints = 500; // Smoothness (number of points)
-		const amplitude = 300; // Wave height
-		const frequency = 0.3; // Wave frequency
-		const speed = 0.02; // Animation speed
-		const waveLayers = 1; // Multiple layers for depth
-		const colors = ["#34d399", "#fde047", "#f43f5e"]; // Green, yellow, red
-
 		let time = 0;
 
-		// Generate a sine wave pattern
-		const generateWave = (layerIndex: number) => {
-			const points: number[] = [];
-			for (let i = 0; i < numPoints; i++) {
-				const wave = Math.sin(i * frequency + time + layerIndex); // Smooth sine wave
-				const offset = Math.sin(time * 0.2 + layerIndex); // Slow oscillation
-				points.push(amplitude * wave * (1 - Math.abs(offset)));
-			}
-			return points;
-		};
-
-		// Draw the waveform
 		const drawWaveform = () => {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			const numPoints = 200; // Smoothness
 			const centerY = canvas.height / 2;
 			const segmentWidth = canvas.width / numPoints;
 
-			for (let layer = 0; layer < waveLayers; layer++) {
-				const points = generateWave(layer);
-
-				// Begin drawing
+			for (let layer = 0; layer < layers; layer++) {
 				ctx.beginPath();
+
 				for (let i = 0; i < numPoints; i++) {
 					const x = i * segmentWidth;
-					const y = centerY + points[i];
+					const wave = Math.sin(i * frequency + time + layer);
+					const offset = Math.sin(time * 0.2 + layer); // Smooth variation
+					const y =
+						centerY + amplitude * wave * (1 - Math.abs(offset));
 
 					if (i === 0) ctx.moveTo(x, y);
 					else ctx.lineTo(x, y);
 				}
 
-				// Gradient effect
+				// Gradient coloring
 				const gradient = ctx.createLinearGradient(
 					0,
 					0,
@@ -77,25 +78,31 @@ const SmoothWaveform: React.FC = () => {
 			}
 		};
 
-		// Animation loop
 		const animate = () => {
 			time += speed;
 			drawWaveform();
 			requestAnimationFrame(animate);
 		};
+
 		animate();
 
 		return () => {
 			window.removeEventListener("resize", resizeCanvas);
 		};
-	}, []);
+	}, [amplitude, frequency, layers, speed, colors]);
 
 	return (
-		<canvas
-			ref={canvasRef}
-			className="absolute top-0 left-0 w-full h-full"
-		/>
+		<div
+			style={{
+				width,
+				height,
+				position: "relative", // Keeps it non-blocking
+				overflow: "hidden",
+			}}
+		>
+			<canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />
+		</div>
 	);
 };
 
-export default SmoothWaveform;
+export default Waveform;
