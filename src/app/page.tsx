@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import SpotifyWaveform from "@/components/SpotifyWaveform";
 import { useState } from "react";
 
+// import { signIn } from "@/auth";
+import { signIn } from "next-auth/react";
+
 export default function Home() {
 	const [isPlaying, setIsPlaying] = useState(false);
 
@@ -36,7 +39,7 @@ export default function Home() {
 			<h1 className="text-4xl font-bold">Playlist Transfer</h1>
 			<p className="text-lg">Move your playlists with ease!</p>
 
-			<Button size={"xl"} variant={"destructive"}>
+			<Button size={"xl"} variant={"default"} onClick={() => signIn()}>
 				<AudioLines size={48} />
 				Get Started <ChevronRight size={48} />
 			</Button>
