@@ -2,7 +2,35 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Spotify from "next-auth/providers/spotify";
 import { cookies } from "next/headers";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { JWT } from "next-auth/jwt";
 import { v4 as uuidv4 } from "uuid";
+
+// https://stackoverflow.com/questions/74425533/property-role-does-not-exist-on-type-user-adapteruser-in-nextauth
+declare module "next-auth" {
+	interface Session {
+		spotifyId: string | null;
+		googleId: string | null;
+		provider: string | null;
+	}
+}
+
+declare module "@auth/core/adapters" {
+	interface AdapterUser {
+		spotifyId: string | null;
+		googleId: string | null;
+		provider: string | null;
+	}
+}
+
+declare module "next-auth/jwt" {
+	/** Returned by the `jwt` callback and `auth`, when using JWT sessions */
+	interface JWT {
+		/** OpenID ID Token */
+		id: string | null;
+		provider: string | null;
+	}
+}
 
 const spotify_scopes = [
 	"user-read-email",
@@ -110,6 +138,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				});
 			}
 			return true;
+		},
+		async jwt({ token, user, account }) {
+			if (user && user.id && account && account.provider) {
+				token.id = user.id;
+				token.provider = account.provider;
+			}
+
+			return { ...token, ...user };
+		},
+		// async jwt({ token, account }) {
+		// 	if (account) {
+		// 		token.provider = account.provider;
+		// 	}
+		// 	return token;
+		// },
+
+		async session({ session, token }) {
+			if (token && token.id && token.provider) {
+				if (token.provider === "spotify") session.spotifyId = token.id;
+				if (token.provider === "google") session.googleId = token.id;
+
+				session.provider = token.provider;
+			}
+			return session;
 		},
 	},
 });
