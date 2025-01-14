@@ -1,7 +1,17 @@
 import React from "react";
+import SpotifyAvatar from "./SpotifyAvatar";
+import { auth } from "@/auth";
 
-function navbar() {
-	return <div>navbar</div>;
+async function Navbar() {
+	const session = await auth();
+	return (
+		<div>
+			<h1>NAVBAR</h1>
+			<SpotifyAvatar
+				imageSrc={session?.user?.image || null}
+			></SpotifyAvatar>
+		</div>
+	);
 }
 
-export default navbar;
+export default Navbar;

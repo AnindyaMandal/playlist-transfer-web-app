@@ -1,4 +1,3 @@
-import { CloudCog } from "lucide-react";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Spotify from "next-auth/providers/spotify";
