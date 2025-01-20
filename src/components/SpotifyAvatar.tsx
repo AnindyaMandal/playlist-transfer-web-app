@@ -5,10 +5,13 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Button } from "./ui/button";
+import { signOut } from "@/auth";
 
 const SpotifyAvatar = (props: {
 	imageSrc: string | null;
 	userName: string | null;
+	provider: string | null;
 }) => {
 	return (
 		<div>
@@ -36,6 +39,32 @@ const SpotifyAvatar = (props: {
 				</HoverCardTrigger>
 				<HoverCardContent className="w-80">
 					<h1> WE HOVERING </h1>
+					{props.provider != null ? (
+						<>
+							<div>
+								<Avatar>
+									<AvatarImage
+										src="Spotify_Primary_Logo_RGB_Green.png"
+										alt="SpotifyIcon"
+									/>
+									<AvatarFallback></AvatarFallback>
+								</Avatar>
+								<h1>Hello {props.userName}</h1>
+								<form
+									action={async () => {
+										"use server";
+										await signOut();
+									}}
+								>
+									<Button variant={"destructive"}>
+										Sign Out
+									</Button>
+								</form>
+							</div>
+						</>
+					) : (
+						<h1>Unable to find user info</h1>
+					)}
 				</HoverCardContent>
 			</HoverCard>
 		</div>

@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { JWT } from "next-auth/jwt";
 import { v4 as uuidv4 } from "uuid";
+import { addSessionData } from "./lib/redis/redisActions";
 
 // https://stackoverflow.com/questions/74425533/property-role-does-not-exist-on-type-user-adapteruser-in-nextauth
 declare module "next-auth" {
@@ -87,6 +88,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		},
 		async signIn({ user, account, profile }) {
 			const cookieStore = await cookies();
+			let uuid = cookieStore.get("sessionID")?.value;
+			console.log("existing session cookie ID: " + uuid);
+			if (uuid == undefined) {
+				uuid = uuidv4();
+				console.log("No existing cookie...\nNew Cookie: " + uuid);
+				cookieStore.set("sessionID", uuid!, {
+					maxAge: 3600,
+					sameSite: "lax",
+				});
+			}
+
 			if (account?.provider === "spotify") {
 				const accessToken = account.access_token;
 				const expireTime = account.expires_at;
@@ -109,6 +121,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 				console.log(user);
 				console.log(profile);
+
+				addSessionData(uuid, accessToken, userId, null);
 			}
 
 			if (account?.provider === "google") {
@@ -125,18 +139,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					"Difference: ",
 					account.expires_at! - Math.round(Date.now() / 1000)
 				);
+
+				addSessionData(uuid, null, null, accessToken);
 			}
 
-			let uuid = cookieStore.get("sessionID")?.value;
-			console.log("existing session cookie ID: " + uuid);
-			if (uuid == undefined) {
-				uuid = uuidv4();
-				console.log("No existing cookie...\nNew Cookie: " + uuid);
-				cookieStore.set("sessionID", uuid!, {
-					maxAge: 3600,
-					sameSite: "lax",
-				});
-			}
 			return true;
 		},
 		async jwt({ token, user, account }) {
