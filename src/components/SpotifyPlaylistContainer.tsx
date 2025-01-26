@@ -1,0 +1,110 @@
+import React from "react";
+import { useEffect, useState } from "react";
+import SpotifyPlaylistItem from "./SpotifyPlaylistItem";
+import { getUserPlaylists } from "@/lib/spotifyWebApi";
+import { PlaylistData } from "@/interfaces/PlaylistData";
+import { ScrollArea } from "./ui/scroll-area";
+import { PlaylistItem } from "@/interfaces/PlaylistItem";
+import { SkeletonLoader } from "./SkeletonLoader";
+
+const sessionStorageKeys = {
+	userPlaylistData: "userPlaylistSessionData",
+	playlistTrackData: "playlistTrackData",
+};
+
+const SpotifyPlaylistContainer = () => {
+	const [playlistData, setPlaylistData] = useState<PlaylistData | null>(null);
+	const [loading, setLoading] = useState<boolean>(true);
+	function getFromSessionStorage(key: string) {
+		if (window) {
+			const data = window?.sessionStorage.getItem(key);
+			if (data == undefined || null) {
+				console.log("GetSessionStorage Data null: " + data);
+
+				return null;
+			}
+			const jsonData = JSON.parse(data);
+			console.log(typeof jsonData);
+			console.log("jsonData: " + jsonData);
+
+			setLoading(false);
+
+			return jsonData;
+		}
+	}
+	function storeToSessionStorage(data: string, key: string) {
+		window.sessionStorage.setItem(key, data);
+	}
+
+	const handleGetUserPlaylists = async () => {
+		const endpointData = await getUserPlaylists();
+		if (endpointData !== undefined) {
+			console.log("JSON PLaylist Data:");
+			console.log(endpointData);
+
+			if ("errMsg" in endpointData) {
+				console.log("Found error while getting user playlists");
+				return;
+			}
+			setPlaylistData(endpointData);
+
+			storeToSessionStorage(
+				JSON.stringify(endpointData),
+				sessionStorageKeys.userPlaylistData
+			);
+		}
+
+		setLoading(false);
+	};
+
+	useEffect(() => {
+		console.log("USE EFFECT!");
+		const sessionData = getFromSessionStorage(
+			sessionStorageKeys.userPlaylistData
+		);
+
+		console.log("Use Effect SESSION DATA: \n" + sessionData);
+
+		if (!sessionData) {
+			console.log("USE EFFECT NO SESSION DATA FOUND MAKING API CALL");
+
+			handleGetUserPlaylists();
+		} else {
+			setPlaylistData(sessionData);
+		}
+	}, []);
+
+	if (loading) {
+		return (
+			<>
+				<SkeletonLoader text="Loading playlists..."></SkeletonLoader>
+			</>
+		);
+	}
+	return (
+		<>
+			<ScrollArea className="h-[50vh] w-3/4 rounded-md">
+				<ul>
+					{playlistData ? (
+						playlistData.items.map((item: PlaylistItem) => {
+							return (
+								<li key={item.id}>
+									<SpotifyPlaylistItem
+										item={item}
+										playlistID={item.id}
+									/>
+								</li>
+							);
+						})
+					) : (
+						<div className="spotify_playlist_li">
+							<h1>No Playlist data!</h1>
+						</div>
+					)}
+				</ul>
+			</ScrollArea>
+		</>
+	);
+};
+
+export default SpotifyPlaylistContainer;

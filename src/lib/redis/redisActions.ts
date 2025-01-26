@@ -60,14 +60,14 @@ export async function getSessionData(sessionUuid: string) {
 	const googleToken = await client.hGet(sessionUuid, "googleToken");
 
 	console.log(
-		`Got Redis value: Key: ${sessionUuid} Spotify Token: ${spotifyToken}`
+		`\nGot Redis value: Key: ${sessionUuid} Spotify Token: ${spotifyToken}`
 	);
 	console.log(
-		`Got Redis value: Key: ${sessionUuid} Spotify UserID: ${spotifyUserId}`
+		`\nGot Redis value: Key: ${sessionUuid} Spotify UserID: ${spotifyUserId}`
 	);
 
 	console.log(
-		`Got Redis value: Key: ${sessionUuid} Google Token: ${googleToken}`
+		`\nGot Redis value: Key: ${sessionUuid} Google Token: ${googleToken}`
 	);
 
 	await client.quit();

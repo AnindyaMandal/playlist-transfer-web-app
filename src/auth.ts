@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { addSessionData } from "./lib/redis/redisActions";
 
 // https://stackoverflow.com/questions/74425533/property-role-does-not-exist-on-type-user-adapteruser-in-nextauth
+// Needed to remove errors for custom next js session information
+// Seemed useless sadly since I can only have session for one Auth at a time. Cant keep both spotify and google data in a single session
 declare module "next-auth" {
 	interface Session {
 		spotifyId: string | null;
@@ -102,7 +104,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			if (account?.provider === "spotify") {
 				const accessToken = account.access_token;
 				const expireTime = account.expires_at;
-				const userId = user.id;
+				const userId = user.name;
 
 				console.log(
 					"SPOTIFY ACCESS TOKEN: " +

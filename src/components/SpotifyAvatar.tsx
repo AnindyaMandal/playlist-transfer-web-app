@@ -8,10 +8,14 @@ import {
 import { Button } from "./ui/button";
 import { signOut } from "@/auth";
 
+// Small avatar showing who is logged in to the current session
+// Hover allows signout
 const SpotifyAvatar = (props: {
 	imageSrc: string | null;
 	userName: string | null;
 	provider: string | null;
+	spotifyId: string | null;
+	googleId: string | null;
 }) => {
 	return (
 		<div>
@@ -38,7 +42,6 @@ const SpotifyAvatar = (props: {
 					)}
 				</HoverCardTrigger>
 				<HoverCardContent className="w-80">
-					<h1> WE HOVERING </h1>
 					{props.provider != null ? (
 						<>
 							<div>
@@ -50,6 +53,9 @@ const SpotifyAvatar = (props: {
 									<AvatarFallback></AvatarFallback>
 								</Avatar>
 								<h1>Hello {props.userName}</h1>
+								<h2>Spotify ID: {props.spotifyId}</h2>
+								<h2>Google ID: {props.googleId}</h2>
+
 								<form
 									action={async () => {
 										"use server";
