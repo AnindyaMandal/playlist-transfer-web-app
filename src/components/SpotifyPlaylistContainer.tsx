@@ -6,6 +6,12 @@ import { PlaylistData } from "@/interfaces/PlaylistData";
 import { ScrollArea } from "./ui/scroll-area";
 import { PlaylistItem } from "@/interfaces/PlaylistItem";
 import { SkeletonLoader } from "./SkeletonLoader";
+import { SignInButton } from "./SignInButton";
+import {
+	ScrollAreaScrollbar,
+	ScrollAreaThumb,
+	ScrollAreaViewport,
+} from "@radix-ui/react-scroll-area";
 
 const sessionStorageKeys = {
 	userPlaylistData: "userPlaylistSessionData",
@@ -15,6 +21,8 @@ const sessionStorageKeys = {
 const SpotifyPlaylistContainer = () => {
 	const [playlistData, setPlaylistData] = useState<PlaylistData | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [spotifySignedIn, setSpotifySignedIn] = useState<boolean>(true);
+
 	function getFromSessionStorage(key: string) {
 		if (window) {
 			const data = window?.sessionStorage.getItem(key);
@@ -44,6 +52,9 @@ const SpotifyPlaylistContainer = () => {
 
 			if ("errMsg" in endpointData) {
 				console.log("Found error while getting user playlists");
+
+				setLoading(false);
+				setSpotifySignedIn(false);
 				return;
 			}
 			setPlaylistData(endpointData);
@@ -59,6 +70,7 @@ const SpotifyPlaylistContainer = () => {
 
 	useEffect(() => {
 		console.log("USE EFFECT!");
+		setSpotifySignedIn(true);
 		const sessionData = getFromSessionStorage(
 			sessionStorageKeys.userPlaylistData
 		);
@@ -70,39 +82,68 @@ const SpotifyPlaylistContainer = () => {
 
 			handleGetUserPlaylists();
 		} else {
+			console.log("USE EFFECT Setting Playlist Data");
 			setPlaylistData(sessionData);
 		}
 	}, []);
 
-	if (loading) {
-		return (
-			<>
-				<SkeletonLoader text="Loading playlists..."></SkeletonLoader>
-			</>
-		);
-	}
+	// if (loading) {
+	// 	return (
+	// 		<>
+	// 			<SkeletonLoader text="Loading playlists..."></SkeletonLoader>
+	// 		</>
+	// 	);
+	// }
 	return (
 		<>
-			<ScrollArea className="h-[50vh] w-3/4 rounded-md">
-				<ul>
-					{playlistData ? (
-						playlistData.items.map((item: PlaylistItem) => {
-							return (
-								<li key={item.id}>
-									<SpotifyPlaylistItem
-										item={item}
-										playlistID={item.id}
-									/>
-								</li>
-							);
-						})
+			{loading ? (
+				<>
+					<SkeletonLoader text="Loading playlists..."></SkeletonLoader>
+				</>
+			) : (
+				<>
+					{spotifySignedIn ? (
+						<>
+							<ScrollArea className="max-h-[50vh] w-3/4 rounded-md">
+								<ScrollAreaViewport className="h-full w-full overflow-y-auto">
+									<ul className="pt-2">
+										{playlistData ? (
+											playlistData.items.map(
+												(item: PlaylistItem) => {
+													return (
+														<li key={item.id}>
+															<SpotifyPlaylistItem
+																item={item}
+																playlistID={
+																	item.id
+																}
+															/>
+														</li>
+													);
+												}
+											)
+										) : (
+											<div className="spotify_playlist_li">
+												<h1>No Playlist data!</h1>
+											</div>
+										)}
+									</ul>
+								</ScrollAreaViewport>
+								<ScrollAreaScrollbar
+									orientation="vertical"
+									className="w-2 bg-gray-800"
+								>
+									<ScrollAreaThumb className="bg-gray-600 rounded"></ScrollAreaThumb>
+								</ScrollAreaScrollbar>
+							</ScrollArea>
+						</>
 					) : (
-						<div className="spotify_playlist_li">
-							<h1>No Playlist data!</h1>
-						</div>
+						<>
+							<SignInButton></SignInButton>
+						</>
 					)}
-				</ul>
-			</ScrollArea>
+				</>
+			)}
 		</>
 	);
 };

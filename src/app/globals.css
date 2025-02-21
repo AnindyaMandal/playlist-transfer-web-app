@@ -77,14 +77,14 @@ html {
 }
 
 .spotify_playlist_li {
-	border: 4px solid #1db954;
+	border-bottom: 3px solid #1db954;
 	background-color: #191414;
 	color: #ffffff;
 	padding: 10px;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	-webkit-border-radius: 10px;
-	border-radius: 10px;
+	-webkit-border-radius: 0px;
+	border-radius: 0px;
 	margin-right: 10px;
 }

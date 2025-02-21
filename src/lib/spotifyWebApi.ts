@@ -9,11 +9,42 @@ import { TrackData } from "@/interfaces/TrackData";
 import { TrackItem } from "@/interfaces/TrackItem";
 import { getSessionData } from "./redis/redisActions";
 import { cookies } from "next/headers";
+import { SpotifyUserData } from "@/interfaces/SpotifyUserData";
 
-export async function getUserPlaylists(
-	accessToken: string | undefined = undefined,
-	userId: string | undefined = undefined
-): Promise<PlaylistData | ErrorMsg | undefined> {
+// Function called by pages to request playlists
+// Calls functions to get access token and handles the errors associated with that
+// If no errors, calls the API function to get playlists from Spotify API
+export async function getUserPlaylists(): Promise<
+	PlaylistData | ErrorMsg | undefined
+> {
+	const userData: ErrorMsg | SpotifyUserData = await apiGetAccessToken();
+	if ("errMsg" in userData) {
+		console.log("Returning Error User Data getUserPlaylists");
+		return userData;
+	}
+	return await apiGetUserPlaylists(userData.accessToken, userData.userId);
+}
+
+export async function getPlaylistTracks(
+	playlistId: string
+): Promise<TrackData | ErrorMsg | undefined> {
+	const userData: ErrorMsg | SpotifyUserData = await apiGetAccessToken();
+	if ("errMsg" in userData) {
+		console.log("Returning Error User Data getUserPlaylists");
+		return userData;
+	}
+	return await apiGetPlaylistTracks(
+		userData.accessToken,
+		userData.userId,
+		playlistId
+	);
+}
+
+// API Call
+// Checks if the user has session ID cookie to get access token from Redis DB
+// Returns Spotify userId and accessToken if found
+// Otherwise returns error msg
+async function apiGetAccessToken(): Promise<ErrorMsg | SpotifyUserData> {
 	const cookieStore = await cookies();
 	const sessionUuid = cookieStore.get("sessionID")?.value;
 
@@ -34,7 +65,7 @@ export async function getUserPlaylists(
 	}
 
 	const sessionData = await getSessionData(sessionUuid);
-	userId = sessionData.spotifyUserId;
+	const userId = sessionData.spotifyUserId;
 
 	if (userId == undefined) {
 		// TODO: Throw some error?
@@ -52,7 +83,7 @@ export async function getUserPlaylists(
 
 	// No access token given, therefore first call of this function, not recursing
 	// Get it from redis using sessionID
-	accessToken = sessionData.spotifyToken;
+	const accessToken = sessionData.spotifyToken;
 	if (accessToken == undefined) {
 		// TODO: Throw some error?
 		// Return some error message that can be displayed to user
@@ -69,10 +100,19 @@ export async function getUserPlaylists(
 		return errorReturn;
 	}
 
-	return await apiGetUserPlaylists(accessToken, userId);
+	return {
+		accessToken: accessToken,
+		userId: userId,
+	};
 }
 
 // https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
+// API Call to Spotify Web API
+// Recursively gets user's playlists using userId and accessToken
+// Exit condition is next is null but its more of a do while
+// Initial run next is always null, so it gets the first 50 entries
+// If there are more than 50 playlists then the next field from the response will not be null
+// And therefore the function will recurse and run again
 async function apiGetUserPlaylists(
 	accessToken: string,
 	userId: string,
@@ -86,14 +126,6 @@ async function apiGetUserPlaylists(
 		if (next == null) {
 			console.log("Next is Null!");
 
-			// response = await fetch(
-			// 	baseUri + `/v1/me/playlists?limit=50&offset=0`,
-			// 	{
-			// 		headers: {
-			// 			Authorization: "Bearer " + accessToken,
-			// 		},
-			// 	}
-			// );
 			response = await fetch(
 				baseUri + `/v1/users/${userId}/playlists?limit=50&offset=0`,
 				{
@@ -116,14 +148,6 @@ async function apiGetUserPlaylists(
 					`/v1/me/playlists?limit=50&offset=${nextOffset}`
 			);
 
-			// response = await fetch(
-			// 	baseUri + `/v1/me/playlists?limit=50&offset=${nextOffset}`,
-			// 	{
-			// 		headers: {
-			// 			Authorization: "Bearer " + accessToken,
-			// 		},
-			// 	}
-			// );
 			response = await fetch(
 				baseUri +
 					`/v1/users/${userId}/playlists?limit=50&offset=${nextOffset}`,
@@ -146,6 +170,9 @@ async function apiGetUserPlaylists(
 		console.log(data);
 		console.log("Total Playlists: " + data.total);
 		console.log("First name: " + data.items[0].name);
+		// Clean data has the fields that playlistData interface has but it could also be an error which should travel
+		// up the recursion chain
+		// Thats why there is no type declaration for this
 		cleanData = {
 			next: data.next,
 			total: data.total,
@@ -205,6 +232,153 @@ async function apiGetUserPlaylists(
 			};
 
 			return errorReturn;
+		}
+	}
+}
+
+async function apiGetPlaylistTracks(
+	accessToken: string,
+	userId: string,
+	playlistId: string,
+	next: string | null = null
+): Promise<TrackData | ErrorMsg | undefined> {
+	const baseUri = "https://api.spotify.com";
+	let cleanData = undefined;
+	let response;
+
+	try {
+		if (next == null) {
+			console.log("Next is Null!");
+
+			response = await fetch(
+				baseUri +
+					`/v1/playlists/${playlistId}/tracks?limit=50&offset=0`,
+				{
+					headers: {
+						Authorization: "Bearer " + accessToken,
+					},
+				}
+			);
+		} else {
+			// Splitting next URL to get the offset to make the next call
+			console.log("Next not null");
+			console.log("Next URL: " + next);
+			// https://api.spotify.com/v1/users/anindya098/playlists?offset=20&limit=10
+			const nextUrlParams = new URL(next);
+			const nextOffset = nextUrlParams.searchParams.get("offset");
+			// const urlParams = next.split("playlists?offset=");
+			// const nextOffset = urlParams[1].split("&limit=")[0];
+
+			console.log("Offset value: " + nextOffset);
+			console.log(
+				"\nFetching from....  " +
+					baseUri +
+					`/v1/playlists/${playlistId}/tracks?limit=50&offset=${nextOffset}`
+			);
+
+			response = await fetch(
+				baseUri +
+					`/v1/playlists/${playlistId}/tracks?limit=50&offset=${nextOffset}`,
+				{
+					headers: {
+						Authorization: "Bearer " + accessToken,
+					},
+				}
+			);
+		}
+		if (response.status != 200) {
+			console.log(response.status);
+			console.log(response.headers);
+			throw new Error(response.statusText);
+		}
+		const data = await response.json();
+
+		console.log(data.items[0].track);
+		// console.log(data.items[0].track);
+		console.log("Total Songs: " + data.total);
+
+		cleanData = {
+			next: data.next,
+			total: data.total,
+			playlistID: playlistId,
+			items: data.items.map((element: any): TrackItem => {
+				const items = {
+					trackID: element.track.id,
+					trackName: element.track.name,
+					trackArtists: element.track.artists.map(
+						(trackArtist: any): ArtistData => {
+							const artists = {
+								id: trackArtist.id,
+								name: trackArtist.name,
+								popularity: trackArtist.popularity,
+								artistURI: trackArtist.uri,
+							};
+
+							return artists;
+						}
+					),
+					trackDurationMs: element.track.duration_ms,
+					albumType: element.track.album.album_type,
+					albumName: element.track.album.name,
+					albumReleaseDate: element.track.album.release_date,
+					albumArtists: element.track.album.artists.map(
+						(albumArtist: any): ArtistData => {
+							const artists = {
+								id: albumArtist.id,
+								name: albumArtist.name,
+								artistURI: albumArtist.uri,
+							};
+							return artists;
+						}
+					),
+					popularity: element.track.popularity,
+					// trackURI: element.track.uri,
+					trackURI:
+						"http://open.spotify.com/track/" + element.track.id,
+					ytURI: "",
+				};
+				return items;
+			}),
+		};
+
+		// console.log("Clean Song Data:");
+		// console.log(cleanData);
+		// return cleanData;
+		if (!cleanData) throw new Error("Clean data is undefined");
+		// There are tracks that exist in next
+		// we need to keep going and do fetch req until next is null
+		// the return value from recursive calls should update the clean data every return
+		// The final return should have a proper array of items, next should be null
+		if (cleanData.next != null) {
+			console.log("Next is: " + cleanData.next);
+			console.log("Recursing...");
+			const nextData = await apiGetPlaylistTracks(
+				accessToken,
+				userId,
+				playlistId,
+				(next = cleanData.next)
+			);
+
+			console.log("NextData from recursion: ");
+			console.log(nextData);
+			// Error check for recursive returns
+			if (nextData == undefined || "errMsg" in nextData) {
+				// Next data that came from recursion has some kind of error
+				// So just pass it up the chain
+				return nextData;
+			}
+			cleanData.next = nextData?.next;
+			Array.prototype.push.apply(cleanData.items, nextData?.items);
+			console.log("Concatinated Data from recursion: ");
+			console.log(cleanData);
+		}
+
+		return cleanData;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log(
+				"Fetch Error getPlaylistTracks: " + error.message + error.name
+			);
 		}
 	}
 }
