@@ -14,9 +14,9 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 	let count = 0;
 	return (
 		<div className="overflow-hidden">
-			<ScrollArea className="max-h-[20vw] w-full rounded-md ">
+			<ScrollArea className="max-h-[20vw] w-full rounded-md overflow-y-auto">
 				<ScrollAreaViewport
-					className="h-full w-full overflow-y-auto"
+					className="h-full w-full "
 					onWheel={(e) => {
 						// Prevent parent from scrolling only if child can scroll further
 						const target = e.currentTarget;
@@ -63,10 +63,7 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 						)}
 					</ul>
 				</ScrollAreaViewport>
-				<ScrollAreaScrollbar
-					orientation="vertical"
-					className="w-2 bg-gray-800"
-				>
+				<ScrollAreaScrollbar orientation="vertical" className="w-28">
 					<ScrollAreaThumb className="bg-gray-600 rounded"></ScrollAreaThumb>
 				</ScrollAreaScrollbar>
 			</ScrollArea>

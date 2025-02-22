@@ -87,13 +87,6 @@ const SpotifyPlaylistContainer = () => {
 		}
 	}, []);
 
-	// if (loading) {
-	// 	return (
-	// 		<>
-	// 			<SkeletonLoader text="Loading playlists..."></SkeletonLoader>
-	// 		</>
-	// 	);
-	// }
 	return (
 		<>
 			{loading ? (

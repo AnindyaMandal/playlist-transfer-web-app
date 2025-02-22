@@ -5,8 +5,8 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Button } from "./ui/button";
-import { signOut } from "@/auth";
+
+import SignOutButton from "./SignOutButton";
 
 // Small avatar showing who is logged in to the current session
 // Hover allows signout
@@ -18,7 +18,7 @@ const SpotifyAvatar = (props: {
 	googleId: string | null;
 }) => {
 	return (
-		<div>
+		<div className="bg-slate-900">
 			<HoverCard>
 				<HoverCardTrigger asChild>
 					{props.imageSrc == null ? (
@@ -26,7 +26,7 @@ const SpotifyAvatar = (props: {
 							<Avatar>
 								<AvatarImage
 									src="Spotify_Primary_Logo_RGB_Green.png"
-									alt="SpotifyIcon"
+									alt="Spotify Icon placeholder for user avatar"
 								/>
 								<AvatarFallback></AvatarFallback>
 							</Avatar>
@@ -35,41 +35,49 @@ const SpotifyAvatar = (props: {
 						<Avatar>
 							<AvatarImage
 								src={props.imageSrc}
-								alt="SpotifyIcon"
+								alt="User Avatar"
 							/>
 							<AvatarFallback></AvatarFallback>
 						</Avatar>
 					)}
 				</HoverCardTrigger>
-				<HoverCardContent className="w-80">
+				<HoverCardContent className="w-80 bg-slate-900 text-white">
 					{props.provider != null ? (
-						<>
-							<div>
-								<Avatar>
-									<AvatarImage
-										src="Spotify_Primary_Logo_RGB_Green.png"
-										alt="SpotifyIcon"
-									/>
-									<AvatarFallback></AvatarFallback>
-								</Avatar>
-								<h1>Hello {props.userName}</h1>
-								<h2>Spotify ID: {props.spotifyId}</h2>
-								<h2>Google ID: {props.googleId}</h2>
+						<div className="">
+							<Avatar>
+								<AvatarImage
+									src="Spotify_Primary_Logo_RGB_Green.png"
+									alt="SpotifyIcon"
+								/>
+								<AvatarFallback></AvatarFallback>
+							</Avatar>
+							<h1>Hello {props.userName}</h1>
+							<h2>Spotify ID: {props.spotifyId}</h2>
+							<h2>Google ID: {props.googleId}</h2>
 
-								<form
+							{/* <form
 									action={async () => {
 										"use server";
 										await signOut();
+										const cookieStorage = await cookies();
+										cookieStorage
+											.getAll()
+											.forEach((cookie) => {
+												cookieStorage.delete(
+													cookie.name
+												);
+											});
+										redirect("/");
 									}}
 								>
 									<Button variant={"destructive"}>
 										Sign Out
 									</Button>
-								</form>
-							</div>
-						</>
+								</form> */}
+							<SignOutButton></SignOutButton>
+						</div>
 					) : (
-						<h1>Unable to find user info</h1>
+						<h1 className="">Unable to find user info</h1>
 					)}
 				</HoverCardContent>
 			</HoverCard>

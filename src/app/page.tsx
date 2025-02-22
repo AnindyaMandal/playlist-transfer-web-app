@@ -20,6 +20,7 @@ export default function Home() {
 			</div>
 			{session ? (
 				<>
+					<h1>{session.user?.name}</h1>
 					<SpotifyPlaylistContainer></SpotifyPlaylistContainer>
 				</>
 			) : (
