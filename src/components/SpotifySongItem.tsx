@@ -15,14 +15,16 @@ const SpotifySongItem = (props: { trackItem: TrackItem }) => {
 					<h3>Album: {props.trackItem.albumName}</h3>
 					<h3 className="whitespace-pre">{artists.join(" & ")}</h3>
 				</div>
-				<Image
-					src={props.trackItem.albumImages[0].url}
-					// width={props.trackItem.albumImages[0].width!}
-					// height={props.trackItem.albumImages[0].height!}
-					width={150}
-					height={150}
-					alt={"album image"}
-				></Image>
+				<a href={props.trackItem.trackURI} target="_blank">
+					<Image
+						src={props.trackItem.albumImages[0].url}
+						// width={props.trackItem.albumImages[0].width!}
+						// height={props.trackItem.albumImages[0].height!}
+						width={150}
+						height={150}
+						alt={"album image"}
+					></Image>
+				</a>
 			</div>
 		</div>
 	);
