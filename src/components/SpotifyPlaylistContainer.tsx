@@ -97,7 +97,7 @@ const SpotifyPlaylistContainer = () => {
 				<>
 					{spotifySignedIn ? (
 						<>
-							<ScrollArea className="max-h-[50vh] w-3/4 rounded-md">
+							<ScrollArea className="max-h-[50vh] w-11/12 rounded-md">
 								<ScrollAreaViewport className="h-full w-full overflow-y-auto">
 									<ul className="pt-2">
 										{playlistData ? (

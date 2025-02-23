@@ -88,3 +88,19 @@ html {
 	border-radius: 0px;
 	margin-right: 10px;
 }
+
+.spotify_track_li {
+	background-color: #191414;
+	border-left: 3px solid #1db954;
+	padding: 2px;
+	padding-left: 10px;
+	margin: 0px 0px 10px 0px;
+	width: 100%;
+	cursor: default;
+}
+
+.spotify_track_li:hover {
+	background-color: black;
+	transition-duration: 300ms;
+	border-left: 3px solid #ffffff;
+}

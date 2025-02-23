@@ -52,7 +52,7 @@ export default function SpotifyPlaylistItem(props: {
 			</button>
 
 			{isExpanded && (
-				<div className="bg-gray-900 p-4">
+				<div className="bg-[#191414] p-4">
 					{isLoading ? (
 						<div className="text-center text-gray-400">
 							Loading...

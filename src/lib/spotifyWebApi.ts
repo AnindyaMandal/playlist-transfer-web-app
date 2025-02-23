@@ -10,6 +10,8 @@ import { TrackItem } from "@/interfaces/TrackItem";
 import { getSessionData } from "./redis/redisActions";
 import { cookies } from "next/headers";
 import { SpotifyUserData } from "@/interfaces/SpotifyUserData";
+import { SpotifyAlbumImage } from "@/interfaces/SpotifyAlbumImage";
+import { url } from "inspector";
 
 // Function called by pages to request playlists
 // Calls functions to get access token and handles the errors associated with that
@@ -329,6 +331,17 @@ async function apiGetPlaylistTracks(
 								artistURI: albumArtist.uri,
 							};
 							return artists;
+						}
+					),
+					albumImages: element.track.album.images.map(
+						(albumImage: SpotifyAlbumImage) => {
+							const image = {
+								url: albumImage.url,
+								height: albumImage.height,
+								width: albumImage.width,
+							};
+
+							return image;
 						}
 					),
 					popularity: element.track.popularity,

@@ -1,9 +1,8 @@
 import { signOut } from "@/auth";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+
 import React from "react";
 import { Button } from "./ui/button";
-import { revalidatePath } from "next/cache";
 
 const SignOutButton = () => {
 	async function signOutCleanup() {
@@ -16,12 +15,6 @@ const SignOutButton = () => {
 			cookieStorage.delete(cookie.name);
 		});
 		await signOut();
-		try {
-			revalidatePath(`/`);
-			redirect(`/`);
-		} catch (error) {
-			console.log("SIGNOUT BUTTON ERROR: " + error);
-		}
 	}
 
 	return (

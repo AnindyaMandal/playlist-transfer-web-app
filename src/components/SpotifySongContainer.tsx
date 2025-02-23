@@ -1,20 +1,15 @@
 import SpotifySongItem from "./SpotifySongItem";
 import { TrackData } from "@/interfaces/TrackData";
 import { TrackItem } from "@/interfaces/TrackItem";
-import {
-	ScrollArea,
-	ScrollAreaScrollbar,
-	ScrollAreaThumb,
-	ScrollAreaViewport,
-} from "@radix-ui/react-scroll-area";
+import { ScrollArea, ScrollAreaViewport } from "@radix-ui/react-scroll-area";
 
 import React from "react";
 
 const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 	let count = 0;
 	return (
-		<div className="overflow-hidden">
-			<ScrollArea className="max-h-[20vw] w-full rounded-md overflow-y-auto">
+		<div className="overflow-hidden ml-8">
+			<ScrollArea className="max-h-[20vw] w-full rounded-md overflow-y-auto ">
 				<ScrollAreaViewport
 					className="h-full w-full "
 					onWheel={(e) => {
@@ -34,7 +29,7 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 						}
 					}}
 				>
-					<ul>
+					<ul className="ml-5">
 						{props.trackData !== undefined ? (
 							props.trackData.items.map(
 								(trackItem: TrackItem) => {
@@ -47,7 +42,7 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 												count
 											}
 										>
-											<div className="flex flex-row border-spacing-1 border">
+											<div className="flex flex-row w-full ">
 												<SpotifySongItem
 													trackItem={trackItem}
 												/>
@@ -63,9 +58,6 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 						)}
 					</ul>
 				</ScrollAreaViewport>
-				<ScrollAreaScrollbar orientation="vertical" className="w-28">
-					<ScrollAreaThumb className="bg-gray-600 rounded"></ScrollAreaThumb>
-				</ScrollAreaScrollbar>
 			</ScrollArea>
 		</div>
 	);

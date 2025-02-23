@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArtistData } from "./ArtistData";
+import { SpotifyAlbumImage } from "./SpotifyAlbumImage";
 export interface TrackItem {
 	trackID: string;
 	trackName: string;
@@ -8,6 +9,7 @@ export interface TrackItem {
 	albumName: string;
 	albumReleaseDate: string;
 	albumArtists: ArtistData[];
+	albumImages: SpotifyAlbumImage[];
 	popularity: number;
 	trackURI: string;
 	ytURI: string;
