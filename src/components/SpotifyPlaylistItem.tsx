@@ -9,15 +9,60 @@ export default function SpotifyPlaylistItem(props: {
 	item: PlaylistItem;
 	playlistID: string;
 }) {
+	const sessionStorageKeys = {
+		userPlaylistData: "userPlaylistSessionData",
+		playlistTrackData: "playlistTrackData",
+	};
+
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [trackData, setTrackData] = useState<TrackData>();
+
+	const getSessionStorageData = () => {
+		if (window) {
+			const data = window?.sessionStorage.getItem(
+				sessionStorageKeys.playlistTrackData + props.playlistID
+			);
+			if (data == undefined || data == null) {
+				console.log("GetSessionStorage Data null: " + data);
+
+				return undefined;
+			}
+			const jsonData = JSON.parse(data);
+			console.log(typeof jsonData);
+			console.log("jsonData: " + jsonData);
+
+			return jsonData;
+		}
+	};
+
+	function storeToSessionStorage(data: string, key: string) {
+		window.sessionStorage.setItem(key, data);
+	}
 
 	const handleToggle = async () => {
 		if (!isExpanded) {
 			setIsExpanded(true);
 			setIsLoading(true);
 
+			const sessionData = getSessionStorageData();
+			if (sessionData !== undefined) {
+				if ("errMsg" in sessionData) {
+					console.log(
+						"Found Error while getting tracks for:\t" +
+							props.item.name
+					);
+					console.log(sessionData.errMsg);
+					return;
+				}
+
+				setTrackData(sessionData);
+				setIsLoading(false);
+
+				return;
+			}
+
+			console.log("NO SESSION DATA, making API call");
 			const apiData = await getPlaylistTracks(props.playlistID);
 
 			if (apiData !== undefined) {
@@ -29,6 +74,11 @@ export default function SpotifyPlaylistItem(props: {
 					console.log(apiData.errMsg);
 					return;
 				}
+
+				storeToSessionStorage(
+					JSON.stringify(apiData),
+					sessionStorageKeys.playlistTrackData + props.playlistID
+				);
 
 				setTrackData(apiData);
 				setIsLoading(false);

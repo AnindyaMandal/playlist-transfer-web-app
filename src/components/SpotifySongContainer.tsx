@@ -43,6 +43,7 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 											}
 										>
 											<div className="flex flex-row w-full ">
+												<h1>{count}</h1>
 												<SpotifySongItem
 													trackItem={trackItem}
 												/>

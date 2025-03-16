@@ -89,6 +89,11 @@ html {
 	margin-right: 10px;
 }
 
+.spotify_playlist_li:hover {
+	transition-duration: 200ms;
+	border-left: 10px solid #1db954;
+}
+
 .spotify_track_li {
 	background-color: #191414;
 	border-left: 3px solid #1db954;

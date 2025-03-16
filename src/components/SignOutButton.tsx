@@ -14,6 +14,9 @@ const SignOutButton = () => {
 			console.log("\n\tFound cookie for deletion: \t" + cookie.name);
 			cookieStorage.delete(cookie.name);
 		});
+		console.log("Time to redirect...");
+
+		// await signOut({ redirectTo: "http://localhost:3000", redirect: true });
 		await signOut();
 	}
 

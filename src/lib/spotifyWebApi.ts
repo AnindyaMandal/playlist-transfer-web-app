@@ -395,3 +395,115 @@ async function apiGetPlaylistTracks(
 		}
 	}
 }
+
+// async function apiGetUserPlaylistsLoop(
+// 	accessToken: string,
+// 	userId: string
+// ): Promise<PlaylistData | ErrorMsg | undefined> {
+// 	const baseUri = "https://api.spotify.com";
+// 	let cleanData = undefined;
+// 	let next: string | null = null;
+// 	let response;
+
+// 	do {
+// 		if (next == null) {
+// 			console.log("Next is Null!");
+
+// 			response = await fetch(
+// 				baseUri + `/v1/users/${userId}/playlists?limit=50&offset=0`,
+// 				{
+// 					headers: {
+// 						Authorization: "Bearer " + accessToken,
+// 					},
+// 				}
+// 			);
+// 		} else {
+// 			console.log("Next not null");
+// 			console.log("Next: " + next);
+// 			// https://api.spotify.com/v1/users/anindya098/playlists?offset=20&limit=10
+// 			const urlParams = next.split("playlists?offset=");
+// 			const nextOffset = urlParams[1].split("&limit=")[0];
+
+// 			console.log("Offset value: " + nextOffset);
+// 			console.log(
+// 				"\nFetching from....  " +
+// 					baseUri +
+// 					`/v1/me/playlists?limit=50&offset=${nextOffset}`
+// 			);
+
+// 			response = await fetch(
+// 				baseUri +
+// 					`/v1/users/${userId}/playlists?limit=50&offset=${nextOffset}`,
+// 				{
+// 					headers: {
+// 						Authorization: "Bearer " + accessToken,
+// 					},
+// 				}
+// 			);
+// 		}
+// 		if (response.status != 200) {
+// 			console.log(response.status);
+// 			console.log(response.headers);
+// 			throw new Error(response.statusText);
+// 		}
+// 		console.log(response.status);
+// 		console.log(response.headers);
+// 		const data = await response.json();
+
+// 		console.log(data);
+// 		console.log("Total Playlists: " + data.total);
+// 		console.log("First name: " + data.items[0].name);
+// 		// Clean data has the fields that playlistData interface has but it could also be an error which should travel
+// 		// up the recursion chain
+// 		// Thats why there is no type declaration for this
+// 		cleanData = {
+// 			next: data.next,
+// 			total: data.total,
+// 			items: data.items
+// 				.filter((item: any) => item !== null)
+// 				.map((element: any): PlaylistItem => {
+// 					const items = {
+// 						name: element.name,
+// 						description: element.description,
+// 						id: element.id,
+// 						track_href: element.tracks.href,
+// 						track_total: element.tracks.total,
+// 					};
+// 					return items;
+// 				}),
+// 		};
+
+// 		if (!cleanData) throw new Error("Clean data is undefined");
+// 		// There are tracks that exist in next
+// 		// we need to keep going and do fetch req until next is null
+// 		// the return value from recursive calls should update the clean data every return
+// 		// The final return should have a proper array of items, next should be null
+// 		if (cleanData.next != null) {
+// 			console.log("Next is: " + cleanData.next);
+
+// 			const nextData = await apiGetUserPlaylists(
+// 				accessToken,
+// 				userId,
+// 				(next = cleanData.next)
+// 			);
+
+// 			console.log("NextData from recursion: ");
+// 			console.log(nextData);
+// 			// Error check for recursive returns
+// 			if (nextData == undefined || "errMsg" in nextData) {
+// 				// Next data that came from recursion has some kind of error
+// 				// So just pass it up the chain
+// 				return nextData;
+// 			}
+
+// 			cleanData.next = nextData?.next;
+// 			Array.prototype.push.apply(cleanData.items, nextData?.items);
+// 			console.log("Concatinated Data from recursion: ");
+// 			console.log(cleanData);
+// 		}
+
+// 		return cleanData;
+// 	} while (next != null);
+
+// 	return cleanData;
+// }
