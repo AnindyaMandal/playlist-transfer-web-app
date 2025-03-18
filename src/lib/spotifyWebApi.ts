@@ -511,7 +511,7 @@ async function apiGetUserPlaylistTracksLoop(
 	accessToken: string,
 	userId: string,
 	playlistId: string,
-	offset: number = 1500
+	offset: number = 0
 ): Promise<TrackData | ErrorMsg | undefined> {
 	const baseUri = "https://api.spotify.com";
 	let cleanData = undefined as undefined | any;
