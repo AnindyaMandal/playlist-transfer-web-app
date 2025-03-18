@@ -12,6 +12,7 @@ import { cookies } from "next/headers";
 import { SpotifyUserData } from "@/interfaces/SpotifyUserData";
 import { SpotifyAlbumImage } from "@/interfaces/SpotifyAlbumImage";
 import { url } from "inspector";
+import { json } from "stream/consumers";
 
 // Function called by pages to request playlists
 // Calls functions to get access token and handles the errors associated with that
@@ -24,7 +25,8 @@ export async function getUserPlaylists(): Promise<
 		console.log("Returning Error User Data getUserPlaylists");
 		return userData;
 	}
-	return await apiGetUserPlaylists(userData.accessToken, userData.userId);
+	// return await apiGetUserPlaylists(userData.accessToken, userData.userId);
+	return await apiGetUserPlaylistsLoop(userData.accessToken, userData.userId);
 }
 
 export async function getPlaylistTracks(
@@ -35,7 +37,13 @@ export async function getPlaylistTracks(
 		console.log("Returning Error User Data getUserPlaylists");
 		return userData;
 	}
-	return await apiGetPlaylistTracks(
+	// return await apiGetPlaylistTracks(
+	// 	userData.accessToken,
+	// 	userData.userId,
+	// 	playlistId
+	// );
+
+	return await apiGetUserPlaylistTracksLoop(
 		userData.accessToken,
 		userData.userId,
 		playlistId
@@ -396,114 +404,348 @@ async function apiGetPlaylistTracks(
 	}
 }
 
-// async function apiGetUserPlaylistsLoop(
-// 	accessToken: string,
-// 	userId: string
-// ): Promise<PlaylistData | ErrorMsg | undefined> {
-// 	const baseUri = "https://api.spotify.com";
-// 	let cleanData = undefined;
-// 	let next: string | null = null;
-// 	let response;
+async function apiGetUserPlaylistsLoop(
+	accessToken: string,
+	userId: string,
+	offset: number = 0
+): Promise<PlaylistData | ErrorMsg | undefined> {
+	const baseUri = "https://api.spotify.com";
+	let cleanData = undefined as undefined | any;
+	let next = null as null | string;
+	const limit = 10;
+	// const maxOffset = offset + limit;
+	const maxOffset = 9999;
 
-// 	do {
-// 		if (next == null) {
-// 			console.log("Next is Null!");
+	let response;
 
-// 			response = await fetch(
-// 				baseUri + `/v1/users/${userId}/playlists?limit=50&offset=0`,
-// 				{
-// 					headers: {
-// 						Authorization: "Bearer " + accessToken,
-// 					},
-// 				}
-// 			);
-// 		} else {
-// 			console.log("Next not null");
-// 			console.log("Next: " + next);
-// 			// https://api.spotify.com/v1/users/anindya098/playlists?offset=20&limit=10
-// 			const urlParams = next.split("playlists?offset=");
-// 			const nextOffset = urlParams[1].split("&limit=")[0];
+	try {
+		do {
+			if (offset >= maxOffset) break;
+			if (next == null) {
+				console.log("Next is Null!");
 
-// 			console.log("Offset value: " + nextOffset);
-// 			console.log(
-// 				"\nFetching from....  " +
-// 					baseUri +
-// 					`/v1/me/playlists?limit=50&offset=${nextOffset}`
-// 			);
+				response = await fetch(
+					baseUri +
+						`/v1/users/${userId}/playlists?limit=${limit}&offset=${offset}`,
+					{
+						headers: {
+							Authorization: "Bearer " + accessToken,
+						},
+					}
+				);
+			} else {
+				console.log("Next not null");
+				console.log("Next: " + next);
+				// https://api.spotify.com/v1/users/anindya098/playlists?offset=20&limit=10
+				const urlParams = next.split("playlists?offset=");
+				const nextOffset = urlParams[1].split("&limit=")[0];
 
-// 			response = await fetch(
-// 				baseUri +
-// 					`/v1/users/${userId}/playlists?limit=50&offset=${nextOffset}`,
-// 				{
-// 					headers: {
-// 						Authorization: "Bearer " + accessToken,
-// 					},
-// 				}
-// 			);
-// 		}
-// 		if (response.status != 200) {
-// 			console.log(response.status);
-// 			console.log(response.headers);
-// 			throw new Error(response.statusText);
-// 		}
-// 		console.log(response.status);
-// 		console.log(response.headers);
-// 		const data = await response.json();
+				console.log("Offset value: " + nextOffset);
+				console.log(
+					"\nFetching from....  " +
+						baseUri +
+						`/v1/me/playlists?limit=${limit}&offset=${nextOffset}`
+				);
 
-// 		console.log(data);
-// 		console.log("Total Playlists: " + data.total);
-// 		console.log("First name: " + data.items[0].name);
-// 		// Clean data has the fields that playlistData interface has but it could also be an error which should travel
-// 		// up the recursion chain
-// 		// Thats why there is no type declaration for this
-// 		cleanData = {
-// 			next: data.next,
-// 			total: data.total,
-// 			items: data.items
-// 				.filter((item: any) => item !== null)
-// 				.map((element: any): PlaylistItem => {
-// 					const items = {
-// 						name: element.name,
-// 						description: element.description,
-// 						id: element.id,
-// 						track_href: element.tracks.href,
-// 						track_total: element.tracks.total,
-// 					};
-// 					return items;
-// 				}),
-// 		};
+				response = await fetch(
+					baseUri +
+						`/v1/users/${userId}/playlists?limit=${limit}&offset=${nextOffset}`,
+					{
+						headers: {
+							Authorization: "Bearer " + accessToken,
+						},
+					}
+				);
 
-// 		if (!cleanData) throw new Error("Clean data is undefined");
-// 		// There are tracks that exist in next
-// 		// we need to keep going and do fetch req until next is null
-// 		// the return value from recursive calls should update the clean data every return
-// 		// The final return should have a proper array of items, next should be null
-// 		if (cleanData.next != null) {
-// 			console.log("Next is: " + cleanData.next);
+				offset = parseInt(nextOffset, 10);
+				console.log("Next Offset value: " + offset);
+				console.log("Max Offset value: " + maxOffset);
+			}
+			if (response.status != 200) {
+				console.log(response.status);
+				console.log(response.headers);
+				throw new Error(response.statusText);
+			}
+			console.log(response.status);
+			console.log(response.headers);
+			const data = await response.json();
 
-// 			const nextData = await apiGetUserPlaylists(
-// 				accessToken,
-// 				userId,
-// 				(next = cleanData.next)
-// 			);
+			console.log("Total Playlists: " + data.total);
+			console.log("Next Offset value: " + offset);
+			console.log("Max Offset value: " + maxOffset);
 
-// 			console.log("NextData from recursion: ");
-// 			console.log(nextData);
-// 			// Error check for recursive returns
-// 			if (nextData == undefined || "errMsg" in nextData) {
-// 				// Next data that came from recursion has some kind of error
-// 				// So just pass it up the chain
-// 				return nextData;
-// 			}
+			if (cleanData === undefined) {
+				cleanData = getCleanPlaylistData(data);
+			} else {
+				const nextData = getCleanPlaylistData(data);
+				cleanData.next = nextData?.next;
+				Array.prototype.push.apply(cleanData?.items, nextData?.items);
+			}
 
-// 			cleanData.next = nextData?.next;
-// 			Array.prototype.push.apply(cleanData.items, nextData?.items);
-// 			console.log("Concatinated Data from recursion: ");
-// 			console.log(cleanData);
-// 		}
+			if (!cleanData)
+				throw new Error(
+					"ERROR: apiGetUserPlaylistsLoop: Clean data is undefined "
+				);
 
-// 		return cleanData;
-// 	} while (next != null);
+			next = cleanData.next;
+		} while (next != null);
 
-// 	return cleanData;
-// }
+		return cleanData;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log(
+				"Fetch Error getUserPlaylists: " + error.message + error.name
+			);
+
+			const errorReturn: ErrorMsg = {
+				errType: "Fetch Error in getUserPlaylists: " + error.name,
+				errMsg: error.message,
+			};
+
+			return errorReturn;
+		}
+	}
+}
+
+async function apiGetUserPlaylistTracksLoop(
+	accessToken: string,
+	userId: string,
+	playlistId: string,
+	offset: number = 1500
+): Promise<TrackData | ErrorMsg | undefined> {
+	const baseUri = "https://api.spotify.com";
+	let cleanData = undefined as undefined | any;
+	let next = null as null | string;
+	const limit = 50;
+	// const maxOffset = offset + limit;
+	const maxOffset = 9999;
+
+	let response;
+
+	try {
+		do {
+			if (offset >= maxOffset) break;
+			if (next == null) {
+				console.log("Next is Null!");
+
+				response = await fetch(
+					baseUri +
+						`/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`,
+					{
+						headers: {
+							Authorization: "Bearer " + accessToken,
+						},
+					}
+				);
+			} else {
+				console.log("Next not null");
+				console.log("Next: " + next);
+				// https://api.spotify.com/v1/users/anindya098/playlists?offset=20&limit=10
+				const nextUrlParams = new URL(next);
+				const nextOffset = nextUrlParams.searchParams.get("offset");
+
+				console.log("Offset value: " + nextOffset);
+				console.log(
+					"\nFetching from....  " +
+						baseUri +
+						`/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${nextOffset}`
+				);
+
+				response = await fetch(
+					baseUri +
+						`/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${nextOffset}`,
+					{
+						headers: {
+							Authorization: "Bearer " + accessToken,
+						},
+					}
+				);
+
+				offset = parseInt(nextOffset!, 10);
+				console.log("Next Offset value: " + offset);
+				console.log("Max Offset value: " + maxOffset);
+			}
+			if (response.status != 200) {
+				console.log(response.status);
+				console.log(response.headers);
+				throw new Error(response.statusText);
+			}
+			console.log(response.status);
+			const data = await response.json();
+
+			// console.log(data);
+			console.log("Total Songs: " + data.total);
+			console.log("Next Offset value: " + offset);
+			console.log("Max Offset value: " + maxOffset);
+
+			if (offset >= 1550) {
+				console.log(data);
+			}
+			if (cleanData === undefined) {
+				cleanData = getCleanPlaylistTrackData(data, playlistId);
+			} else {
+				const nextData = getCleanPlaylistTrackData(data, playlistId);
+				cleanData.next = nextData?.next;
+				Array.prototype.push.apply(cleanData?.items, nextData?.items);
+			}
+
+			// console.log(cleanData);
+
+			if (!cleanData) throw new Error("Clean data is undefined");
+
+			next = cleanData.next;
+		} while (next != null);
+
+		return cleanData;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log(
+				"Fetch Error getPlaylistTracks: " + error.message + error.name
+			);
+		}
+	}
+}
+
+function getCleanPlaylistData(data: any) {
+	const importantData = {
+		next: data.next,
+		total: data.total,
+		items: data.items
+			.filter((item: any) => item !== null)
+			.map((element: any): PlaylistItem => {
+				const items = {
+					name: element.name,
+					description: element.description,
+					id: element.id,
+					track_href: element.tracks.href,
+					track_total: element.tracks.total,
+				};
+				return items;
+			}),
+	};
+
+	return importantData;
+}
+
+function getCleanPlaylistTrackData(data: any, playlistId: string) {
+	try {
+		const importantData = {
+			next: data.next,
+			total: data.total,
+			playlistID: playlistId,
+			// items: data.items
+			// 	.filter((item: any) => item !== null)
+			// 	.map((element: any): TrackItem | null => {
+			// 		const items = {
+			// 			trackID: element.track.id,
+			// 			trackName: element.track.name,
+			// 			trackArtists: element.track.artists.map(
+			// 				(trackArtist: any): ArtistData => {
+			// 					const artists = {
+			// 						id: trackArtist.id,
+			// 						name: trackArtist.name,
+			// 						popularity: trackArtist.popularity,
+			// 						artistURI: trackArtist.uri,
+			// 					};
+
+			// 					return artists;
+			// 				}
+			// 			),
+			// 			trackDurationMs: element.track.duration_ms,
+			// 			albumType: element.track.album.album_type,
+			// 			albumName: element.track.album.name,
+			// 			albumReleaseDate: element.track.album.release_date,
+			// 			albumArtists: element.track.album.artists.map(
+			// 				(albumArtist: any): ArtistData => {
+			// 					const artists = {
+			// 						id: albumArtist.id,
+			// 						name: albumArtist.name,
+			// 						artistURI: albumArtist.uri,
+			// 					};
+			// 					return artists;
+			// 				}
+			// 			),
+			// 			albumImages: element.track.album.images.map(
+			// 				(albumImage: SpotifyAlbumImage) => {
+			// 					const image = {
+			// 						url: albumImage.url,
+			// 						height: albumImage.height,
+			// 						width: albumImage.width,
+			// 					};
+
+			// 					return image;
+			// 				}
+			// 			),
+			// 			popularity: element.track.popularity,
+			// 			// trackURI: element.track.uri,
+			// 			trackURI:
+			// 				"http://open.spotify.com/track/" + element.track.id,
+			// 			ytURI: "",
+			// 		};
+			// 		return items;
+			// 	}),
+			items: data.items.map((element: any): TrackItem | null => {
+				if (element.track == null || element.track == undefined) {
+					console.log("FOUND NULL ITEM IN TRACK DATA");
+					return null;
+				}
+				const items = {
+					trackID: element.track.id,
+					trackName: element.track.name,
+					trackArtists: element.track.artists.map(
+						(trackArtist: any): ArtistData => {
+							const artists = {
+								id: trackArtist.id,
+								name: trackArtist.name,
+								popularity: trackArtist.popularity,
+								artistURI: trackArtist.uri,
+							};
+
+							return artists;
+						}
+					),
+					trackDurationMs: element.track.duration_ms,
+					albumType: element.track.album.album_type,
+					albumName: element.track.album.name,
+					albumReleaseDate: element.track.album.release_date,
+					albumArtists: element.track.album.artists.map(
+						(albumArtist: any): ArtistData => {
+							const artists = {
+								id: albumArtist.id,
+								name: albumArtist.name,
+								artistURI: albumArtist.uri,
+							};
+							return artists;
+						}
+					),
+					albumImages: element.track.album.images.map(
+						(albumImage: SpotifyAlbumImage) => {
+							const image = {
+								url: albumImage.url,
+								height: albumImage.height,
+								width: albumImage.width,
+							};
+
+							return image;
+						}
+					),
+					popularity: element.track.popularity,
+					// trackURI: element.track.uri,
+					trackURI:
+						"http://open.spotify.com/track/" + element.track.id,
+					ytURI: "",
+				};
+				return items;
+			}),
+		};
+		return importantData;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.log(
+				"Clean Data Error getPlaylistTracks: " +
+					error.message +
+					error.name
+			);
+		}
+	}
+}

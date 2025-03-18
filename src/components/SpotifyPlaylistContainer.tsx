@@ -12,6 +12,8 @@ import {
 	ScrollAreaThumb,
 	ScrollAreaViewport,
 } from "@radix-ui/react-scroll-area";
+import { Button } from "./ui/button";
+import { RefreshCcw } from "lucide-react";
 
 const sessionStorageKeys = {
 	userPlaylistData: "userPlaylistSessionData",
@@ -22,6 +24,7 @@ const SpotifyPlaylistContainer = () => {
 	const [playlistData, setPlaylistData] = useState<PlaylistData | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [spotifySignedIn, setSpotifySignedIn] = useState<boolean>(true);
+	let count = 0;
 
 	function getFromSessionStorage(key: string) {
 		if (window) {
@@ -44,7 +47,13 @@ const SpotifyPlaylistContainer = () => {
 		window.sessionStorage.setItem(key, data);
 	}
 
+	function clearSessionStorage() {
+		window.sessionStorage.clear();
+		handleGetUserPlaylists();
+	}
+
 	const handleGetUserPlaylists = async () => {
+		if (!loading) setLoading(true);
 		const endpointData = await getUserPlaylists();
 		if (endpointData !== undefined) {
 			console.log("JSON PLaylist Data:");
@@ -97,38 +106,50 @@ const SpotifyPlaylistContainer = () => {
 				<>
 					{spotifySignedIn ? (
 						<>
-							<ScrollArea className="max-h-[50vh] w-11/12 rounded-md">
-								<ScrollAreaViewport className="h-full w-full overflow-y-auto">
-									<ul className="pt-2">
-										{playlistData ? (
-											playlistData.items.map(
-												(item: PlaylistItem) => {
-													return (
-														<li key={item.id}>
-															<SpotifyPlaylistItem
-																item={item}
-																playlistID={
-																	item.id
-																}
-															/>
-														</li>
-													);
-												}
-											)
-										) : (
-											<div className="spotify_playlist_li">
-												<h1>No Playlist data!</h1>
-											</div>
-										)}
-									</ul>
-								</ScrollAreaViewport>
-								<ScrollAreaScrollbar
-									orientation="vertical"
-									className="w-2 bg-gray-800"
+							<div className="w-11/12 flex flex-col">
+								<Button
+									className="ml-auto mt-2  mb-4"
+									variant="secondary"
+									size="sm"
+									onClick={clearSessionStorage}
 								>
-									<ScrollAreaThumb className="bg-gray-600 rounded"></ScrollAreaThumb>
-								</ScrollAreaScrollbar>
-							</ScrollArea>
+									<RefreshCcw />
+								</Button>
+								<ScrollArea className="max-h-[50vh] w-full rounded-md">
+									<ScrollAreaViewport className="h-full w-full overflow-y-auto">
+										<ul className="pt-2">
+											{playlistData ? (
+												playlistData.items.map(
+													(item: PlaylistItem) => {
+														count++;
+														return (
+															<li key={item.id}>
+																<h1>{count}</h1>
+																<SpotifyPlaylistItem
+																	item={item}
+																	playlistID={
+																		item.id
+																	}
+																/>
+															</li>
+														);
+													}
+												)
+											) : (
+												<div className="spotify_playlist_li">
+													<h1>No Playlist data!</h1>
+												</div>
+											)}
+										</ul>
+									</ScrollAreaViewport>
+									<ScrollAreaScrollbar
+										orientation="vertical"
+										className="w-2 bg-gray-800"
+									>
+										<ScrollAreaThumb className="bg-gray-600 rounded"></ScrollAreaThumb>
+									</ScrollAreaScrollbar>
+								</ScrollArea>
+							</div>
 						</>
 					) : (
 						<>

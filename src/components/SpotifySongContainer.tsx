@@ -31,8 +31,9 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 				>
 					<ul className="ml-5">
 						{props.trackData !== undefined ? (
-							props.trackData.items.map(
-								(trackItem: TrackItem) => {
+							props.trackData.items
+								.filter((item: TrackItem) => item !== null)
+								.map((trackItem: TrackItem) => {
 									count += 1;
 									return (
 										<li
@@ -50,8 +51,7 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 											</div>
 										</li>
 									);
-								}
-							)
+								})
 						) : (
 							<>
 								<h3>No track data</h3>

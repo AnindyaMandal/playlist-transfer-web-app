@@ -14,7 +14,7 @@ export default function Home() {
 	}
 
 	return (
-		<div className="h-[100%] p-8 bg-black text-white space-y-8 flex flex-col items-center r">
+		<div className="h-[100%] bg-black text-white space-y-8 flex flex-col items-center r">
 			<div className="">
 				<MusicalBars></MusicalBars>
 			</div>

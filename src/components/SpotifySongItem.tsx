@@ -20,8 +20,8 @@ const SpotifySongItem = (props: { trackItem: TrackItem }) => {
 						src={props.trackItem.albumImages[0].url}
 						// width={props.trackItem.albumImages[0].width!}
 						// height={props.trackItem.albumImages[0].height!}
-						width={150}
-						height={150}
+						width={100}
+						height={100}
 						alt={"album image"}
 					></Image>
 				</a>

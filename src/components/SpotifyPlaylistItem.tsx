@@ -40,6 +40,10 @@ export default function SpotifyPlaylistItem(props: {
 		window.sessionStorage.setItem(key, data);
 	}
 
+	// handles the toggle aspect of playlists
+	// Expands playlist when clicked
+	// Checks session storage for playlist data
+	// If not found, then makes API call
 	const handleToggle = async () => {
 		if (!isExpanded) {
 			setIsExpanded(true);
@@ -108,9 +112,11 @@ export default function SpotifyPlaylistItem(props: {
 							Loading...
 						</div>
 					) : (
-						<SpotifySongContainer
-							trackData={trackData}
-						></SpotifySongContainer>
+						<div className="flex flex-col">
+							<SpotifySongContainer
+								trackData={trackData}
+							></SpotifySongContainer>
+						</div>
 					)}
 				</div>
 			)}
