@@ -108,12 +108,12 @@ const SpotifyPlaylistContainer = () => {
 						<>
 							<div className="w-11/12 flex flex-col">
 								<Button
-									className="ml-auto mt-2  mb-4"
+									className="refresh_button"
 									variant="secondary"
-									size="sm"
+									size="default"
 									onClick={clearSessionStorage}
 								>
-									<RefreshCcw />
+									<RefreshCcw className="refresh_icon" />
 								</Button>
 								<ScrollArea className="max-h-[50vh] w-full rounded-md">
 									<ScrollAreaViewport className="h-full w-full overflow-y-auto">
@@ -124,7 +124,7 @@ const SpotifyPlaylistContainer = () => {
 														count++;
 														return (
 															<li key={item.id}>
-																<h1>{count}</h1>
+																{/* <h1>{count}</h1> */}
 																<SpotifyPlaylistItem
 																	item={item}
 																	playlistID={

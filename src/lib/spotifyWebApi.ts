@@ -734,6 +734,7 @@ function getCleanPlaylistTrackData(data: any, playlistId: string) {
 					trackURI:
 						"http://open.spotify.com/track/" + element.track.id,
 					ytURI: "",
+					addedToPlaylist: "searching",
 				};
 				return items;
 			}),

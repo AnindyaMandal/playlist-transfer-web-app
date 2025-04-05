@@ -14,4 +14,5 @@ export interface TrackItem {
 	trackURI: string;
 	ytURI: string;
 	ytData?: any; // The full request data that YT API sent for the specific track, used for adding to playlists
+	addedToPlaylist?: string; // Used to see if track was added to a YT playlist during transfer for feedback to user
 }
