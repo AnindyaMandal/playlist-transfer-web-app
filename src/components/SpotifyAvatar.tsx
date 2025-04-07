@@ -44,17 +44,21 @@ const SpotifyAvatar = (props: {
 				<HoverCardContent className="w-fit h-fit bg-slate-900 text-white z-10 mr-10">
 					{props.provider != null ? (
 						<div className="flex flex-col items-center">
-							<div className="flex flex-row justify-between">
-								<Avatar>
-									<AvatarImage
-										src="Spotify_Primary_Logo_RGB_Green.png"
-										alt="SpotifyIcon"
-									/>
-									<AvatarFallback></AvatarFallback>
-								</Avatar>
-								<h1 className="ml-5 text-center">
-									Hello {props.userName}
-								</h1>
+							<div className="flex flex-col justify-between">
+								<div className="flex flex-row justify-between">
+									<Avatar>
+										<AvatarImage
+											src="Spotify_Primary_Logo_RGB_Green.png"
+											alt="SpotifyIcon"
+										/>
+										<AvatarFallback></AvatarFallback>
+									</Avatar>
+									<h1 className="ml-5 text-center">
+										Hello {props.userName}
+									</h1>
+								</div>
+
+								<h2>Provider: {props.provider}</h2>
 							</div>
 
 							<SignOutButton></SignOutButton>

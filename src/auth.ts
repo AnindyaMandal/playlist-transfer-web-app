@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { JWT } from "next-auth/jwt";
 import { v4 as uuidv4 } from "uuid";
 import { addSessionData } from "./lib/redis/redisActions";
+import { Provider } from "next-auth/providers";
 
 // https://stackoverflow.com/questions/74425533/property-role-does-not-exist-on-type-user-adapteruser-in-nextauth
 // Needed to remove errors for custom next js session information
@@ -54,28 +55,65 @@ const google_scopes = [
 	"https://www.googleapis.com/auth/youtube",
 ];
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-	providers: [
-		Spotify({
-			clientId: process.env.AUTH_SPOTIFY_ID as string,
-			clientSecret: process.env.AUTH_SPOTIFY_SECRET as string,
-			authorization:
-				"https://accounts.spotify.com/authorize?scope=" +
-				spotify_scopes.join("+"),
-		}),
-		Google({
-			clientId: process.env.GOOGLE_CLIENT_ID as string,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-			authorization: {
-				params: {
-					scope: google_scopes.join(" "),
-					prompt: "consent",
-					access_type: "online",
-					response_type: "code",
-				},
+const providers: Provider[] = [
+	Spotify({
+		clientId: process.env.AUTH_SPOTIFY_ID as string,
+		clientSecret: process.env.AUTH_SPOTIFY_SECRET as string,
+		authorization:
+			"https://accounts.spotify.com/authorize?scope=" +
+			spotify_scopes.join("+"),
+	}),
+	Google({
+		clientId: process.env.GOOGLE_CLIENT_ID as string,
+		clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+		authorization: {
+			params: {
+				scope: google_scopes.join(" "),
+				prompt: "consent",
+				access_type: "online",
+				response_type: "code",
 			},
-		}),
-	],
+		},
+	}),
+];
+
+export const providerMap = providers.map((provider) => {
+	if (typeof provider === "function") {
+		console.log("Provider is a function");
+		const providerData = provider();
+		return { id: providerData.id, name: providerData.name };
+	} else {
+		console.log("Provider not a function");
+		return { id: provider.id, name: provider.name };
+	}
+});
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+	// providers: [
+	// 	Spotify({
+	// 		clientId: process.env.AUTH_SPOTIFY_ID as string,
+	// 		clientSecret: process.env.AUTH_SPOTIFY_SECRET as string,
+	// 		authorization:
+	// 			"https://accounts.spotify.com/authorize?scope=" +
+	// 			spotify_scopes.join("+"),
+	// 	}),
+	// 	Google({
+	// 		clientId: process.env.GOOGLE_CLIENT_ID as string,
+	// 		clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+	// 		authorization: {
+	// 			params: {
+	// 				scope: google_scopes.join(" "),
+	// 				prompt: "consent",
+	// 				access_type: "online",
+	// 				response_type: "code",
+	// 			},
+	// 		},
+	// 	}),
+	// ],
+	providers,
+	pages: {
+		signIn: "/signIn",
+	},
 	callbacks: {
 		async redirect({ url, baseUrl }) {
 			// if (url.startsWith("/")) {

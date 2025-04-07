@@ -24,17 +24,19 @@ export default function Home() {
 				</div>
 			) : (
 				<>
-					<div className="w-[90vw] flex flex-col justify-center items-center">
+					<div className="w-[100%] flex flex-col items-center ">
 						<div className="mb-10">
 							<MusicalBars></MusicalBars>
 						</div>
 
-						<h1 className="text-4xl font-bold">
-							Playlist Transfer
-						</h1>
-						<p className="text-lg">
-							Move your playlists with ease!
-						</p>
+						<div className="mb-3 items-center text-center">
+							<h1 className="text-4xl font-bold">
+								Playlist Transfer
+							</h1>
+							<p className="text-lg">
+								Move your playlists with ease!
+							</p>
+						</div>
 
 						<Button
 							size={"xl"}
