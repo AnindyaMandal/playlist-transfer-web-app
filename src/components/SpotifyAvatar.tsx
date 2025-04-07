@@ -41,7 +41,7 @@ const SpotifyAvatar = (props: {
 						</Avatar>
 					)}
 				</HoverCardTrigger>
-				<HoverCardContent className="w-fit h-fit bg-slate-900 text-white z-10 mr-10">
+				<HoverCardContent className="w-fit h-fit bg-slate-900 text-white z-100 mr-10">
 					{props.provider != null ? (
 						<div className="flex flex-col items-center">
 							<div className="flex flex-col justify-between">

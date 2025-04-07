@@ -109,7 +109,7 @@ export default function SpotifyPlaylistItem(props: {
 	};
 
 	return (
-		<div className="w-full mb-2 overflow-hidden">
+		<div className="w-full mb-2 overflow-hidden z-0">
 			<div
 				className="w-full spotify_playlist_li  mr-2"
 				onClick={handleToggle}

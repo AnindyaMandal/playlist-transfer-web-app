@@ -1,12 +1,14 @@
 "use client";
 import { AudioLines, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import MusicalBars from "@/components/MusicalBars";
 import SpotifyPlaylistContainer from "@/components/SpotifyPlaylistContainer";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
 	const { data: session } = useSession();
+	const router = useRouter();
 
 	if (session?.user?.image) {
 		console.log("SESSION FOUND");
@@ -16,7 +18,7 @@ export default function Home() {
 	return (
 		<div className="h-[100%] bg-black text-white space-y-8 flex flex-col justify-center items-center ">
 			{session ? (
-				<div className="w-[90vw] flex flex-col items-center">
+				<div className="w-[90vw] flex flex-col items-center mt-[1vw]">
 					<h1 className="text-lg font-medium">
 						{session.user?.name}&apos;s Playlists:
 					</h1>
@@ -41,7 +43,9 @@ export default function Home() {
 						<Button
 							size={"xl"}
 							variant={"default"}
-							onClick={() => signIn()}
+							onClick={() =>
+								router.push("/signIn?provider=spotify")
+							}
 						>
 							<AudioLines size={48} />
 							Get Started <ChevronRight size={48} />

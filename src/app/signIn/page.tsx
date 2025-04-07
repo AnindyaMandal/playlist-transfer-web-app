@@ -1,20 +1,33 @@
 // import { redirect } from "next/navigation";
-import { signIn, auth, providerMap } from "@/auth";
+import { signIn, providerMap } from "@/auth";
 
 import { AuthError } from "next-auth";
 
-export default async function SignInPage(props: {
-	searchParams: { callbackUrl: string | undefined };
-}) {
-	const rawParams = await props.searchParams; // ✅ FIX: Await it!
+type Props = {
+	searchParams: Promise<{
+		callbackUrl?: string | undefined;
+		provider?: string;
+	}>;
+};
+
+export default async function SignInPage({ searchParams }: Props) {
+	const rawParams = await searchParams;
 	console.log("Raw searchParams:", rawParams);
 	const callbackUrl =
 		typeof rawParams?.callbackUrl === "string"
 			? rawParams.callbackUrl
 			: "/";
+	const selectedProvider = rawParams?.provider;
+	console.log("Selected Provider: " + selectedProvider);
+	console.log("Provider Map: " + JSON.stringify(providerMap));
+	const validProviderIds = providerMap.map((p) => p.id);
+	const providersToShow =
+		selectedProvider && validProviderIds.includes(selectedProvider)
+			? providerMap.filter((p) => p.id === selectedProvider)
+			: providerMap;
 	return (
 		<div className="flex flex-col gap-2 w-full h-full items-center justify-center">
-			{Object.values(providerMap).map((provider) => (
+			{providersToShow.map((provider) => (
 				<form
 					key={provider.id}
 					action={async () => {
@@ -47,90 +60,21 @@ export default async function SignInPage(props: {
 						}
 					}}
 				>
-					<button type="submit" className="spotify_playlist_li">
-						<span>Sign in with {provider.name}</span>
-					</button>
+					<h1>ProviderID: {provider.id}</h1>
+					{provider.id == "spotify" ? (
+						<button type="submit" className="spotify_playlist_li">
+							<span>Sign in with {provider.name}</span>
+						</button>
+					) : (
+						<button
+							type="submit"
+							className="signin_with_google_btn"
+						>
+							<span>Sign in with {provider.name}</span>
+						</button>
+					)}
 				</form>
 			))}
 		</div>
 	);
 }
-
-// export default async function SignInPage(props: {
-// 	searchParams: { callbackUrl?: string };
-// }) {
-// 	const callbackUrl = props.searchParams?.callbackUrl ?? "/";
-
-// 	return (
-// 		<div className="flex flex-col gap-2">
-// 			{Object.values(providerMap).map((provider) => (
-// 				<form
-// 					key={provider.id}
-// 					action={async (formData: FormData) => {
-// 						"use server";
-// 						try {
-// 							const cb = formData.get("callbackUrl") as string;
-// 							await signIn(provider.id, {
-// 								redirectTo: cb || "/",
-// 							});
-// 						} catch (error) {
-// 							if (error instanceof AuthError) {
-// 								console.error(
-// 									"AUTH ERROR:",
-// 									error.message,
-// 									error.type
-// 								);
-// 							}
-// 							throw error;
-// 						}
-// 					}}
-// 				>
-// 					<input
-// 						type="hidden"
-// 						name="callbackUrl"
-// 						value={callbackUrl}
-// 					/>
-// 					<button type="submit">Sign in with {provider.name}</button>
-// 				</form>
-// 			))}
-// 		</div>
-// 	);
-// }
-
-// app/signIn/page.tsx
-
-// export default async function SignInPage({
-// 	searchParams,
-// }: {
-// 	searchParams: { [key: string]: string | string[] | undefined };
-// }) {
-
-// 	return (
-// 		<div className="flex flex-col gap-2">
-// 			{["google", "spotify"].map((providerId) => (
-// 				<form
-// 					key={providerId}
-// 					action={async () => {
-// 						"use server";
-// 						try {
-// 							await signIn(providerId, {
-// 								redirectTo: callbackUrl,
-// 							});
-// 						} catch (error) {
-// 							if (error instanceof AuthError) {
-// 								console.log(
-// 									"AUTH ERROR:",
-// 									error.message,
-// 									error.type
-// 								);
-// 							}
-// 							throw error;
-// 						}
-// 					}}
-// 				>
-// 					<button type="submit">Sign in with {providerId}</button>
-// 				</form>
-// 			))}
-// 		</div>
-// 	);
-// }
