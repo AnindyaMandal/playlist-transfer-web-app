@@ -81,3 +81,16 @@ export async function getSessionData(sessionUuid: string) {
 
 	return data;
 }
+
+export async function getGoogleToken(sessionUuid: string) {
+	await client.connect();
+
+	const googleToken = await client.hGet(sessionUuid, "googleToken");
+	console.log(
+		`\nGot Redis value in getGoogleToken(): Key: ${sessionUuid} Google Token: ${googleToken}`
+	);
+
+	await client.quit();
+
+	return googleToken;
+}

@@ -4,6 +4,7 @@ import { TrackData } from "@/interfaces/TrackData";
 import { getPlaylistTracks } from "@/lib/spotifyWebApi";
 import { SkeletonLoader } from "./SkeletonLoader";
 import SpotifySongContainer from "./SpotifySongContainer";
+import { redirect } from "next/navigation";
 
 export default function SpotifyPlaylistItem(props: {
 	item: PlaylistItem;
@@ -12,6 +13,7 @@ export default function SpotifyPlaylistItem(props: {
 	const sessionStorageKeys = {
 		userPlaylistData: "userPlaylistSessionData",
 		playlistTrackData: "playlistTrackData",
+		selectedPlaylistId: "spotifyPlaylistTransferId",
 	};
 
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -45,6 +47,11 @@ export default function SpotifyPlaylistItem(props: {
 	const handleYouTubeIconClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
 		console.log("Handle YT Transfer: " + props.item.name);
+		storeToSessionStorage(
+			sessionStorageKeys.playlistTrackData + props.playlistID,
+			sessionStorageKeys.selectedPlaylistId
+		);
+		redirect("/youtube-transfer");
 	};
 
 	// handles the toggle aspect of playlists
@@ -87,6 +94,7 @@ export default function SpotifyPlaylistItem(props: {
 					return;
 				}
 
+				// Store the list of songs in the playlist to session storage.
 				storeToSessionStorage(
 					JSON.stringify(apiData),
 					sessionStorageKeys.playlistTrackData + props.playlistID

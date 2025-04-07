@@ -41,19 +41,25 @@ const SpotifyAvatar = (props: {
 						</Avatar>
 					)}
 				</HoverCardTrigger>
-				<HoverCardContent className="w-80 bg-slate-900 text-white">
+				<HoverCardContent className="w-fit h-fit bg-slate-900 text-white z-10 mr-10">
 					{props.provider != null ? (
-						<div className="">
-							<Avatar>
-								<AvatarImage
-									src="Spotify_Primary_Logo_RGB_Green.png"
-									alt="SpotifyIcon"
-								/>
-								<AvatarFallback></AvatarFallback>
-							</Avatar>
-							<h1>Hello {props.userName}</h1>
-							<h2>Spotify ID: {props.spotifyId}</h2>
-							<h2>Google ID: {props.googleId}</h2>
+						<div className="flex flex-col items-center">
+							<div className="flex flex-row justify-between">
+								<Avatar>
+									<AvatarImage
+										src="Spotify_Primary_Logo_RGB_Green.png"
+										alt="SpotifyIcon"
+									/>
+									<AvatarFallback></AvatarFallback>
+								</Avatar>
+								<h1 className="ml-5 text-center">
+									Hello {props.userName}
+								</h1>
+							</div>
+
+							<SignOutButton></SignOutButton>
+							{/* <h2>Spotify ID: {props.spotifyId}</h2>
+							<h2>Google ID: {props.googleId}</h2> */}
 
 							{/* <form
 									action={async () => {
@@ -74,7 +80,6 @@ const SpotifyAvatar = (props: {
 										Sign Out
 									</Button>
 								</form> */}
-							<SignOutButton></SignOutButton>
 						</div>
 					) : (
 						<h1 className="">Unable to find user info</h1>

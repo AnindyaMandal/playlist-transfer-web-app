@@ -356,6 +356,7 @@ async function apiGetPlaylistTracks(
 					// trackURI: element.track.uri,
 					trackURI:
 						"http://open.spotify.com/track/" + element.track.id,
+					trackDuration: element.track.duration_ms,
 					ytURI: "",
 				};
 				return items;
@@ -733,6 +734,7 @@ function getCleanPlaylistTrackData(data: any, playlistId: string) {
 					// trackURI: element.track.uri,
 					trackURI:
 						"http://open.spotify.com/track/" + element.track.id,
+					trackDuration: element.track.duration_ms,
 					ytURI: "",
 					addedToPlaylist: "searching",
 				};

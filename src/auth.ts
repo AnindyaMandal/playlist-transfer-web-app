@@ -129,18 +129,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 			if (account?.provider === "google") {
 				const accessToken = account.access_token;
-				process.env.GOOGLE_ACCESS_TOKEN = accessToken;
-				console.log(
-					"GOOGLE ACCESS TOKEN: " + process.env.GOOGLE_ACCESS_TOKEN
-				);
+				const expireTime = account.expires_at;
+				const userId = user.name;
+
 				console.log(account.token_type);
 				console.log(account.scope);
 				console.log(account.expires_at);
 				console.log(account.refresh_token);
+				console.log("Current: " + Math.round(Date.now() / 1000));
+				console.log("Expires: " + account.expires_at);
 				console.log(
 					"Difference: ",
-					account.expires_at! - Math.round(Date.now() / 1000)
+					expireTime! - Math.round(Date.now() / 1000)
 				);
+
+				console.log(userId);
 
 				addSessionData(uuid, null, null, accessToken);
 			}

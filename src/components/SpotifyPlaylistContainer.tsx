@@ -18,13 +18,15 @@ import { RefreshCcw } from "lucide-react";
 const sessionStorageKeys = {
 	userPlaylistData: "userPlaylistSessionData",
 	playlistTrackData: "playlistTrackData",
+	selectedPlaylistId: "spotifyPlaylistTransferId",
 };
 
 const SpotifyPlaylistContainer = () => {
 	const [playlistData, setPlaylistData] = useState<PlaylistData | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [spotifySignedIn, setSpotifySignedIn] = useState<boolean>(true);
-	let count = 0;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	let count = 0; // Used for temp display of playlist count
 
 	function getFromSessionStorage(key: string) {
 		if (window) {
@@ -68,6 +70,7 @@ const SpotifyPlaylistContainer = () => {
 			}
 			setPlaylistData(endpointData);
 
+			// Store list of user's playlists to session storage
 			storeToSessionStorage(
 				JSON.stringify(endpointData),
 				sessionStorageKeys.userPlaylistData
@@ -106,7 +109,7 @@ const SpotifyPlaylistContainer = () => {
 				<>
 					{spotifySignedIn ? (
 						<>
-							<div className="w-11/12 flex flex-col">
+							<div className="w-full flex flex-col ">
 								<Button
 									className="refresh_button"
 									variant="secondary"
@@ -115,8 +118,8 @@ const SpotifyPlaylistContainer = () => {
 								>
 									<RefreshCcw className="refresh_icon" />
 								</Button>
-								<ScrollArea className="max-h-[50vh] w-full rounded-md">
-									<ScrollAreaViewport className="h-full w-full overflow-y-auto">
+								<ScrollArea className="max-h-full w-full rounded-md relative z-20">
+									<ScrollAreaViewport className="max-h-[70vh] w-full overflow-y-auto">
 										<ul className="pt-2">
 											{playlistData ? (
 												playlistData.items.map(

@@ -1,7 +1,12 @@
 import SpotifySongItem from "./SpotifySongItem";
 import { TrackData } from "@/interfaces/TrackData";
 import { TrackItem } from "@/interfaces/TrackItem";
-import { ScrollArea, ScrollAreaViewport } from "@radix-ui/react-scroll-area";
+import {
+	ScrollArea,
+	ScrollAreaScrollbar,
+	ScrollAreaThumb,
+	ScrollAreaViewport,
+} from "@radix-ui/react-scroll-area";
 
 import React from "react";
 
@@ -9,7 +14,7 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 	let count = 0;
 	return (
 		<div className="overflow-hidden ml-8">
-			<ScrollArea className="max-h-[20vw] w-full rounded-md overflow-y-auto ">
+			<ScrollArea className="max-h-[25vw] w-full rounded-md overflow-y-auto ">
 				<ScrollAreaViewport
 					className="h-full w-full "
 					onWheel={(e) => {
@@ -59,6 +64,12 @@ const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 						)}
 					</ul>
 				</ScrollAreaViewport>
+				<ScrollAreaScrollbar
+					orientation="vertical"
+					className="w-2 bg-gray-800"
+				>
+					<ScrollAreaThumb className="bg-gray-600 rounded"></ScrollAreaThumb>
+				</ScrollAreaScrollbar>
 			</ScrollArea>
 		</div>
 	);

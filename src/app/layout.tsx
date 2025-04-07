@@ -30,8 +30,10 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				<SessionProvider refetchInterval={3600}>
-					<Navbar></Navbar>
-					{children}
+					<div className="h-full w-full">
+						<Navbar></Navbar>
+						{children}
+					</div>
 				</SessionProvider>
 			</body>
 		</html>
