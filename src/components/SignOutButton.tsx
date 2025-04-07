@@ -1,39 +1,26 @@
-import { signOut } from "@/auth";
-import { cookies } from "next/headers";
-
+"use client";
 import React from "react";
 import { Button } from "./ui/button";
+import { useTransition } from "react";
+import { signOutCleanup } from "@/lib/serverActions/signOutCleanup";
 
-const SignOutButton = () => {
-	async function signOutCleanup() {
-		"use server";
-		console.log("Signing out....");
+export default function SignOutButton() {
+	const [isPending, startTransition] = useTransition();
 
-		const cookieStorage = await cookies();
-		cookieStorage.getAll().forEach((cookie) => {
-			console.log("\n\tFound cookie for deletion: \t" + cookie.name);
-			cookieStorage.delete(cookie.name);
+	const handleSignOut = () => {
+		startTransition(async () => {
+			await signOutCleanup(); // server-side: clears cookies + calls signOut()
+			window.location.reload(); // client-side full redirect
 		});
-		console.log("Time to redirect...");
-
-		// await signOut({ redirectTo: "http://localhost:3000", redirect: true });
-		await signOut();
-	}
+	};
 
 	return (
-		<div>
-			<form
-				action={async () => {
-					"use server";
-					await signOutCleanup();
-				}}
-			>
-				<Button variant={"destructive"} type="submit">
-					Sign Out
-				</Button>
-			</form>
-		</div>
+		<Button
+			onClick={handleSignOut}
+			disabled={isPending}
+			variant="destructive"
+		>
+			{isPending ? "Signing out..." : "Sign Out"}
+		</Button>
 	);
-};
-
-export default SignOutButton;
+}
