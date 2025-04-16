@@ -44,7 +44,6 @@ export async function addSessionData(
 
 		await client.expire(sessionUuid, 3600, "NX"); // Expire key after 1hr if it has no expiry
 		await client.quit();
-		await client.disconnect();
 	} catch (error) {
 		console.log("Could not add session data to redis: " + error);
 	}
@@ -93,4 +92,15 @@ export async function getGoogleToken(sessionUuid: string) {
 	await client.quit();
 
 	return googleToken;
+}
+
+export async function checkKeyExists(sessionUuid: string) {
+	await client.connect();
+
+	const exists = await client.exists(sessionUuid);
+	console.log("SessionID Check: " + sessionUuid + "\tExists: " + exists);
+
+	await client.quit();
+
+	return exists == 0 ? false : true;
 }

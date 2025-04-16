@@ -1,5 +1,5 @@
 import { PlaylistItem } from "@/interfaces/PlaylistItem";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TrackData } from "@/interfaces/TrackData";
 import { getPlaylistTracks } from "@/lib/spotifyWebApi";
 import { SkeletonLoader } from "./SkeletonLoader";
@@ -63,6 +63,8 @@ export default function SpotifyPlaylistItem(props: {
 		if (!isExpanded) {
 			setIsExpanded(true);
 			setIsLoading(true);
+			console.log("Handling Toggle isExpanded:  " + isExpanded);
+			console.log("Handling Toggle isLoading:  " + isLoading);
 
 			const sessionData = getSessionStorageData();
 			if (sessionData !== undefined) {
@@ -106,6 +108,12 @@ export default function SpotifyPlaylistItem(props: {
 		} else {
 			setIsExpanded(false);
 		}
+
+		// useEffect(() => {
+		// 	return () => {
+		// 		second;
+		// 	};
+		// }, [third]);
 	};
 
 	return (
@@ -139,7 +147,7 @@ export default function SpotifyPlaylistItem(props: {
 				</div>
 			</div>
 
-			{isExpanded && (
+			{/* {isExpanded && (
 				<div className="bg-[#191414] p-4">
 					{isLoading ? (
 						<div className="text-center text-gray-400">
@@ -152,6 +160,24 @@ export default function SpotifyPlaylistItem(props: {
 							></SpotifySongContainer>
 						</div>
 					)}
+				</div>
+			)} */}
+
+			{isExpanded && isLoading && (
+				<div className="bg-[#191414] p-4">
+					<div className="text-center text-gray-400">
+						<SkeletonLoader text="Loading tracks..."></SkeletonLoader>
+					</div>
+				</div>
+			)}
+
+			{isExpanded && !isLoading && (
+				<div className="bg-[#191414] p-4 border-b-[3px] border-b-[#1db954]">
+					<div className="flex flex-col ml-8">
+						<SpotifySongContainer
+							trackData={trackData}
+						></SpotifySongContainer>
+					</div>
 				</div>
 			)}
 		</div>

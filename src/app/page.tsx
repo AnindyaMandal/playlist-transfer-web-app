@@ -5,9 +5,13 @@ import { useSession } from "next-auth/react";
 import MusicalBars from "@/components/MusicalBars";
 import SpotifyPlaylistContainer from "@/components/SpotifyPlaylistContainer";
 import { useRouter } from "next/navigation";
+import { isValidSession } from "@/lib/serverActions/verifyTokenStatus";
+import { useEffect, useState } from "react";
+import { SkeletonLoader } from "@/components/SkeletonLoader";
 
 export default function Home() {
-	const { data: session } = useSession();
+	const [validSession, setValidSession] = useState<boolean | null>(null);
+	const { data: session, status } = useSession();
 	const router = useRouter();
 
 	if (session?.user?.image) {
@@ -15,10 +19,44 @@ export default function Home() {
 		console.log(session.user?.image);
 	}
 
+	useEffect(() => {
+		if (status === "authenticated") {
+			const checkValidSession = async () => {
+				try {
+					const exists = await isValidSession();
+					setValidSession(exists);
+				} catch (error) {
+					console.error(
+						"Error validating redis session main page",
+						error
+					);
+					setValidSession(false);
+				}
+			};
+
+			checkValidSession();
+		} else {
+			setValidSession(false);
+		}
+	}, [status]);
+
+	const isLoading = status === "loading" || validSession === null;
+	if (isLoading) {
+		return (
+			<>
+				<div className="h-[100%] bg-black text-white space-y-8 flex flex-col justify-center items-center ">
+					<SkeletonLoader text=""></SkeletonLoader>
+				</div>
+			</>
+		);
+	}
+
 	return (
 		<div className="h-[100%] bg-black text-white space-y-8 flex flex-col justify-center items-center ">
-			{session ? (
+			{session && validSession ? (
 				<div className="w-[90vw] flex flex-col items-center mt-[1vw]">
+					<h1>Session Status: {status}</h1>
+
 					<h1 className="text-lg font-medium">
 						{session.user?.name}&apos;s Playlists:
 					</h1>
@@ -26,11 +64,10 @@ export default function Home() {
 				</div>
 			) : (
 				<>
+					<div className="mb-10">
+						<MusicalBars></MusicalBars>
+					</div>
 					<div className="w-[100%] flex flex-col items-center ">
-						<div className="mb-10">
-							<MusicalBars></MusicalBars>
-						</div>
-
 						<div className="mb-3 items-center text-center">
 							<h1 className="text-4xl font-bold">
 								Playlist Transfer

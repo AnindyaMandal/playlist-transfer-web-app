@@ -49,6 +49,7 @@ const SpotifyPlaylistContainer = () => {
 		window.sessionStorage.setItem(key, data);
 	}
 
+	// Clears the session storage of all saved song/playlist data and gets all the playlists again
 	function clearSessionStorage() {
 		window.sessionStorage.clear();
 		handleGetUserPlaylists();

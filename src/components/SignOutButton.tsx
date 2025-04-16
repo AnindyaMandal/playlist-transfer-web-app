@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { signOutCleanup } from "@/lib/serverActions/signOutCleanup";
 
 export default function SignOutButton() {
+	// https://react.dev/reference/react/useTransition
 	const [isPending, startTransition] = useTransition();
 
 	const handleSignOut = () => {

@@ -13,7 +13,7 @@ import React from "react";
 const SpotifySongContainer = (props: { trackData: TrackData | undefined }) => {
 	let count = 0;
 	return (
-		<div className="overflow-hidden ml-8">
+		<div className="overflow-hidden ">
 			<ScrollArea className="max-h-[25vw] w-full rounded-md overflow-y-auto ">
 				<ScrollAreaViewport
 					className="h-full w-full "

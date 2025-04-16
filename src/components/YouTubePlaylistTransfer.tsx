@@ -69,11 +69,11 @@ const YouTubePlaylistTransfer = () => {
 	}, []);
 
 	return (
-		<div>
+		<>
 			<SpotifySongContainer
 				trackData={selectedPlaylistData}
 			></SpotifySongContainer>
-		</div>
+		</>
 	);
 };
 
